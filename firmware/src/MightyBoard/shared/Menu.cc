@@ -3419,9 +3419,9 @@ void CancelBuildMenu::handleSelect(uint8_t index) {
 	}
 }
 
-
+// NOTE(zapta): added menu items (was 4)
 MainMenu::MainMenu() :
-	Menu(_BV((uint8_t)ButtonArray::UP) | _BV((uint8_t)ButtonArray::DOWN), (uint8_t)4) {
+	Menu(_BV((uint8_t)ButtonArray::UP) | _BV((uint8_t)ButtonArray::DOWN), (uint8_t)6) {
 	reset();
 }
 
@@ -3453,6 +3453,14 @@ void MainMenu::drawItem(uint8_t index, LiquidCrystalSerial& lcd) {
 	case 3:
 		msg = UTILITIES_MSG;
 		break;
+	// >>> NOTE(zapta): added menu items
+	case 4:
+		msg = LOAD_RIGHT_MSG;
+		break;
+	case 5:
+		msg = LOAD_LEFT_MSG;
+		break;
+	// <<<
 	}
 	lcd.writeFromPgmspace(msg);
 }
@@ -3471,6 +3479,16 @@ void MainMenu::handleSelect(uint8_t index) {
 		// home axes script
 		interface::pushScreen(&utilityMenu);
 		return;
+	// >>> NOTE(zapta): added menu items
+	case 4:
+                filamentScreen.setScript(FILAMENT_RIGHT_FOR);
+                interface::pushScreen(&filamentScreen);
+		return;
+	case 5:
+                filamentScreen.setScript(FILAMENT_LEFT_FOR);
+                interface::pushScreen(&filamentScreen);
+		return;
+        // <<<
 	}
 }
 
