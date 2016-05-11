@@ -1,9 +1,11 @@
 #!/bin/bash
 
+platform="ff_creator-2560"
+
 cd firmware
 
-scons platform=ff_creator-2560 
+scons platform=${platform} 
 
-ls -l build/ff_creator-2560
+ls -l build/${platform}
 
 
