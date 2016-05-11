@@ -2,7 +2,7 @@
 
 cd firmware
 
-platform={ff_creator-2560}
+platform="ff_creator-2560"
 
 serial_port="/dev/tty.usbmodemFA131"
 
