@@ -328,7 +328,9 @@ platforms = {
                         'PLATFORM_SPLASH1_MSG=\\\"Sailfish FF Creator \\\"',
                         'PLATFORM_TOOLHEAD_OFFSET_X=3201',
                         'PLATFORM_THE_REPLICATOR_STR=\\\"FF Creator\\\"',
-                        'HEATERS_ON_STEROIDS', 'AUTO_LEVEL',
+                        'HEATERS_ON_STEROIDS', 
+                        # NOTE(zapta): FF Creator Pro doesn't have auto level.
+                        # 'AUTO_LEVEL',
                         'PSTOP_ZMIN_LEVEL', 'HAS_RGB_LED', 'RGB_LED_MENU',
                         'EEPROM_MENU_ENABLE' ]
         },
