@@ -3433,15 +3433,17 @@ void CancelBuildMenu::handleSelect(uint8_t index) {
 	}
 }
 
-// NOTE(zapta): added menu items (was 4)
+// NOTE(zapta): added menu items (originally 4, now 6)
 MainMenu::MainMenu() :
 	Menu(_BV((uint8_t)ButtonArray::UP) | _BV((uint8_t)ButtonArray::DOWN), (uint8_t)6) {
 	reset();
 }
 
+// NOTE(zapta): change first item to 0. Used to be 1 since the first menu
+// entry was a passive text.
 void MainMenu::resetState() {
-	itemIndex = 1;
-	firstItemIndex = 1;
+	itemIndex = 0;
+	firstItemIndex = 0;
 }
 
 void MainMenu::drawItem(uint8_t index, LiquidCrystalSerial& lcd) {
@@ -3451,58 +3453,60 @@ void MainMenu::drawItem(uint8_t index, LiquidCrystalSerial& lcd) {
 	switch (index) {
 	default:
 		return;
+	// >>> NOTE(zapta): removed the first passive entry and move the second
+	// print from CD entry to be first (most common).
 	case 0:
-	{
-		char *name = host::getMachineName();
-		lcd.setCursor((LCD_SCREEN_WIDTH - strlen(name)) >> 1, 0);
-		lcd.writeString(name);
-		return;
-	}
-	case 1:
 		msg = BUILD_MSG;
 		break;
-	case 2:
-		msg = PREHEAT_MSG;
-		break;
-	case 3:
-		msg = UTILITIES_MSG;
-		break;
-	// >>> NOTE(zapta): added menu items
-	case 4:
-		msg = LOAD_RIGHT_MSG;
-		break;
-	case 5:
+	// >>> NOTE(zapta): inserted upload left, upload right, and level commands.
+	case 1:
 		msg = LOAD_LEFT_MSG;
 		break;
-	// <<<
+	case 2:
+		msg = LOAD_RIGHT_MSG;
+		break;
+	case 3:
+		msg = PLATE_LEVEL_MSG;
+		break;
+	case 4:
+		msg = PREHEAT_MSG;
+		break;
+	case 5:
+		msg = UTILITIES_MSG;
+		break;
 	}
 	lcd.writeFromPgmspace(msg);
 }
 
+// >>> NOTE(zapta): updted the handler to reflect the main menu changes above.
 void MainMenu::handleSelect(uint8_t index) {
 	switch (index) {
-	case 1:
+	case 0:
 		// Show build from SD screen
 		interface::pushScreen(&sdMenu);
 		return;
-	case 2:
-		// Show preheat screen
-		interface::pushScreen(&heaterPreheatMenu);
-		return;
-	case 3:
-		// home axes script
-		interface::pushScreen(&utilityMenu);
-		return;
-	// >>> NOTE(zapta): added menu items
-	case 4:
-                filamentScreen.setScript(FILAMENT_RIGHT_FOR);
-                interface::pushScreen(&filamentScreen);
-		return;
-	case 5:
+	case 1:
+	        // Load left fillament.
                 filamentScreen.setScript(FILAMENT_LEFT_FOR);
                 interface::pushScreen(&filamentScreen);
 		return;
-        // <<<
+	case 2:
+	        // Load right fillament.
+                filamentScreen.setScript(FILAMENT_RIGHT_FOR);
+                interface::pushScreen(&filamentScreen);
+		return;
+        case 3:
+		// level_plate script
+		host::startOnboardBuild(utility::LEVEL_PLATE_STARTUP);
+                return;
+	case 4:
+		// Show preheat screen
+		interface::pushScreen(&heaterPreheatMenu);
+		return;
+	case 5:
+		// Show utilities menu
+		interface::pushScreen(&utilityMenu);
+		return;
 	}
 }
 
