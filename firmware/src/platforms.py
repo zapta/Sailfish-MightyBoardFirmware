@@ -331,6 +331,8 @@ platforms = {
                         'HEATERS_ON_STEROIDS', 
                         # NOTE(zapta): FF Creator Pro doesn't have auto level.
                         # 'AUTO_LEVEL',
+                        # NOTE(zapta): enabling reversed file order, to have the latest one first.
+                        'REVERSE_SD_FILES',
                         'PSTOP_ZMIN_LEVEL', 'HAS_RGB_LED', 'RGB_LED_MENU',
                         'EEPROM_MENU_ENABLE' ]
         },
