@@ -4,7 +4,7 @@ cd firmware
 
 platform="ff_creator-2560"
 
-serial_port="/dev/tty.usbmodemFA131"
+serial_port="/dev/tty.usbmodem1411"
 
 #avrdude_bin="/Applications/Arduino.app/Contents/Java/hardware/tools/avr/bin/avrdude"
 
