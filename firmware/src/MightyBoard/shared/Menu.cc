@@ -996,17 +996,20 @@ void MessageScreen::notifyButtonPressed(ButtonArray::ButtonName button) {
 	if ( buttonsDisabled )	return;
 	incomplete = false;
 
-	host::HostState state;
+
+	host::HostState state = host::getHostState();
 	switch (button) {
 	case ButtonArray::CENTER:
-		break;
         case ButtonArray::LEFT:
-		state = host::getHostState();
-		if ( (state == host::HOST_STATE_BUILDING_ONBOARD) ||
-		     (state == host::HOST_STATE_BUILDING) ||
-		     (state == host::HOST_STATE_BUILDING_FROM_SD) ) {
-			cancelBuildMenu.state = 0;
-			interface::pushScreen(&cancelBuildMenu);
+                // NOTE(zapta): a quick abort for local scripts such as leveling.
+                // Originally they required yes/no confirmation.
+		if (state == host::HOST_STATE_BUILDING_ONBOARD) {
+                  host::stopBuild();
+		  interface::popScreen();
+                } else if ((state == host::HOST_STATE_BUILDING) ||
+		      (state == host::HOST_STATE_BUILDING_FROM_SD) ) {
+	            cancelBuildMenu.state = 0;
+		    interface::pushScreen(&cancelBuildMenu);
                 }
         default:
                 break;
@@ -1584,8 +1587,13 @@ void MonitorModeScreen::notifyButtonPressed(ButtonArray::ButtonName button) {
 			interface::pushScreen(&activeBuildMenu);
 			break;
 		case host::HOST_STATE_BUILDING_ONBOARD:
-			cancelBuildMenu.state = 0;
-			interface::pushScreen(&cancelBuildMenu);
+		// NOTE(zapta): this enable quick exit from onboard scripts 
+		// such as leveling, before the script message is displayed
+		// on screen (while the temperatures are still displayed)
+                  host::stopBuild();
+		  interface::popScreen();
+//			cancelBuildMenu.state = 0;
+//			interface::pushScreen(&cancelBuildMenu);
 			break;
 		default:
 			interface::popScreen();
