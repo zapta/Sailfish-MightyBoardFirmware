@@ -168,10 +168,9 @@ void InterfaceBoard::doUpdate() {
 				}
 				// else, after a build, we'll want to go back to the main menu
 				else {
-					while(screenIndex > 0 && (! (screenStack[screenIndex]->optionsMask & IS_STICKY_MASK)))
-						popScreen();
-					if ( buildFinishedScreen && !host::buildWasCancelled )
-						pushScreen(buildFinishedScreen);
+				  // NOTE(zapta): removed switching to buildFinishedScreen.
+				  // Staring in build screen such that the user can monitor 
+				  // the bed temperature and wait until it cools to 50deg.
 				}
 				building = false;
 			}

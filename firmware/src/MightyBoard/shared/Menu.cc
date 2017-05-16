@@ -4665,8 +4665,15 @@ void SDMenu::handleSelect(uint8_t index) {
 
 	// Start a build
 	lastFileIndex = index;
-	if ( host::startBuildFromSD(fname, flen) == sdcard::SD_SUCCESS )
+
+         // NOTE(zapta):
+         // Popping this screen such that the build menu will return directly
+         // to main menue.
+         interface::popScreen();
+
+	if ( host::startBuildFromSD(fname, flen) == sdcard::SD_SUCCESS ) {
 		return;
+        }
 badness:
 	MenuBadness((sdcard::sdAvailable == sdcard::SD_ERR_CRC) ? CARDCRC_MSG : CARDOPENERR_MSG);
 }
