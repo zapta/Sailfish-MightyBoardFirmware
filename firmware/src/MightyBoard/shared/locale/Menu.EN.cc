@@ -38,7 +38,7 @@ const PROGMEM prog_uchar STOP_EXIT_MSG[] = "Begin loading or    " "unloading. Pr
 const PROGMEM prog_uchar TIMEOUT_MSG[] = "5 minute timeout has" "elapsed.  Press the " "center button to    " "finish.";
 
 const PROGMEM prog_uchar LOAD_RIGHT_MSG[]    = "Load right";
-const PROGMEM prog_uchar LOAD_LEFT_MSG[]     = "Load left";
+const PROGMEM prog_uchar LOAD_LEFT_MSG[]     = "Load";  // Left is now the only extruder
 const PROGMEM prog_uchar LOAD_SINGLE_MSG[]   = "Load";
 const PROGMEM prog_uchar UNLOAD_SINGLE_MSG[] = "Unload";
 const PROGMEM prog_uchar UNLOAD_RIGHT_MSG[]  = "Unload right";
@@ -106,7 +106,7 @@ const PROGMEM prog_uchar CARDSIZE_MSG[]    = "Unable to read SD   " "card partit
 const PROGMEM prog_uchar EXTRUDER_TIMEOUT_MSG[] = "I timed out while   attempting to heat  my extruder.";
 const PROGMEM prog_uchar PLATFORM_TIMEOUT_MSG[] = "I timed out while   attempting to heat  my platform.";
 
-const PROGMEM prog_uchar BUILD_MSG[] =            "Print from SD";
+const PROGMEM prog_uchar BUILD_MSG[] =            "Print";
 const PROGMEM prog_uchar PREHEAT_MSG[] =          "Preheat";
 const PROGMEM prog_uchar UTILITIES_MSG[] =        "Utilities";
 const PROGMEM prog_uchar MONITOR_MSG[] =          "Monitor Mode";
@@ -117,7 +117,7 @@ const PROGMEM prog_uchar FILAMENT_OPTIONS_MSG[] = "Filament Loading";
 const PROGMEM prog_uchar VERSION_MSG[] = 	       "Version Information";
 const PROGMEM prog_uchar DSTEPS_MSG[] =           "Disable Steppers";
 const PROGMEM prog_uchar ESTEPS_MSG[] =           "Enable Steppers  ";
-const PROGMEM prog_uchar PLATE_LEVEL_MSG[] =      "Level Build Plate";
+const PROGMEM prog_uchar PLATE_LEVEL_MSG[] =      "Level";
 const PROGMEM prog_uchar PREHEAT_SET_MSG[] =      "Preheat Settings";
 const PROGMEM prog_uchar SETTINGS_MSG[] =         "General Settings";
 const PROGMEM prog_uchar RESET_MSG[] =            "Restore Settings";
