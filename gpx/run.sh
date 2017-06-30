@@ -1,7 +1,18 @@
 #!/bin/bash 
+#
+# usage:   
+#  ./run.sh filename.gcode
 
-basename="$1"
+input_path="$1"
 
+# Verify extension is .gcode
+if [[ ! $input_path =~ ^.*[^/]\.gcode$ ]] ; then 
+  echo "Expecting a .gcode input file"
+  exit 
+fi
+
+# Remove the .gcode extension
+base_path=${input_path%.*}
 
 function check_last_cmd() {
   status="$?"
@@ -11,8 +22,7 @@ function check_last_cmd() {
   fi
 }
 
-
-rm ${basename}.x3g
+rm ${base_path}.x3g
 
 
 ./gpx \
@@ -20,14 +30,19 @@ rm ${basename}.x3g
   -g \
   -p \
   -m r1d \
-  ${basename}.gcode \
-  ${basename}.x3g
+  ${base_path}.gcode \
+  ${base_path}.x3g
 
 check_last_cmd "compiling gcode"
 
+echo "Generated ${base_path}.x3g"
 
+#
+# NOTE(zapta): using here a shell script from another github repository
+# to upload the gpx file to the flashair SD card via wifi.
+#
 ../../../misc/repo/simplify3d/start_flashair_uploader.sh \
-  ./${basename}.x3g
+  ./${base_path}.x3g
 
 
 
