@@ -174,6 +174,7 @@ static void buildInfo(LiquidCrystalSerial& lcd)
 	}
 }
 
+// Display heating progress bar
 static void progressBar(LiquidCrystalSerial& lcd, int16_t delta,
 			int16_t setTemp)
 {
@@ -1506,24 +1507,22 @@ void MonitorModeScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 			}
 			formatTime(buf, secs);
 			lcd.writeString(buf);
-			break;
-
+			break;		
 		case BUILD_TIME_PHASE_TIME_LEFT:
-		        if ( writeTimeLeft(lcd, 1) )
-			     break;
-			//We can't display the time left, so we drop into ZPosition instead
-			buildTimePhase = (enum BuildTimePhase)((uint8_t)buildTimePhase + 1);
+		        if (!host::isBuildComplete() && !heating && lastElapsedSeconds >= 5*60) {
+                          // NOTE(zapta) This may fail if no data. 
+                          // Falling back to an empty display line.
+	  		  writeTimeLeft(lcd, 1);
+			}
+			// If time left is not available display z poz.
+		        //writeZPos(lcd, 1);
+			break;
 
+                // NOTE(zapta): empty these display slots. This will leave
+                // the previous slot displayed.
 		case BUILD_TIME_PHASE_FILAMENT:
-			lcd.moveWriteFromPgmspace(0, 1, MON_FILAMENT_MSG);
-			lcd.setCursor(9, 1);
-			writeFilamentUsed(lcd, command::filamentUsed());
-			break;
-
 		case BUILD_TIME_PHASE_ZPOS:
-		        writeZPos(lcd, 1);
-			break;
-
+		
 		case BUILD_TIME_PHASE_LAST:
 			break;
 
@@ -3467,12 +3466,13 @@ void MainMenu::drawItem(uint8_t index, LiquidCrystalSerial& lcd) {
 		msg = BUILD_MSG;
 		break;
 	// >>> NOTE(zapta): inserted upload left, upload right, and level commands.
-	case 1:
-		msg = LOAD_LEFT_MSG;
-		break;
-//	case 2:
-//		msg = LOAD_RIGHT_MSG;
+        // >>> NOTE(zapta): using a single extruder (left) that is wired as right.
+//	case 1:
+//		msg = LOAD_LEFT_MSG;
 //		break;
+	case 1:
+		msg = LOAD_SINGLE_MSG;   //LOAD_RIGHT_MSG;
+		break;
 	case 2:
 		msg = PLATE_LEVEL_MSG;
 		break;
@@ -3493,16 +3493,17 @@ void MainMenu::handleSelect(uint8_t index) {
 		// Show build from SD screen
 		interface::pushScreen(&sdMenu);
 		return;
-	case 1:
-	        // Load left fillament.
-                filamentScreen.setScript(FILAMENT_LEFT_FOR);
-                interface::pushScreen(&filamentScreen);
-		return;
-//	case 2:
-//	        // Load right fillament.
-//                filamentScreen.setScript(FILAMENT_RIGHT_FOR);
+//	case 1:
+//	        // Load left fillament.
+//                filamentScreen.setScript(FILAMENT_LEFT_FOR);
 //                interface::pushScreen(&filamentScreen);
 //		return;
+        // Load left extruder (wired as right0)
+	case 1:
+	        // Load right fillament.
+                filamentScreen.setScript(FILAMENT_RIGHT_FOR);
+                interface::pushScreen(&filamentScreen);
+		return;
         case 2:
 		// level_plate script
 		host::startOnboardBuild(utility::LEVEL_PLATE_STARTUP);

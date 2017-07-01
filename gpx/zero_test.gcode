@@ -8,8 +8,8 @@
 ;
 ;   Printer Utilities settings:
 ;     Number of extruders: 1
-;     Home Offset X:  119
-;     Home Offset Y:  72
+;     Home Offset X:  118
+;     Home Offset Y:  75
 ;     Home Offset Z:  0 
 ;
 ;   Simplify3D startup script
