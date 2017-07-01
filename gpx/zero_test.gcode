@@ -4,8 +4,16 @@
 ; corner is too high, the printer X zero is skewed to the 
 ; left.
 ;
-; Working values: Home Offset X:  
-; G1 X move : 120
+; Working values: 
+;
+;   Printer Utilities settings:
+;     Number of extruders: 1
+;     Home Offset X:  119
+;     Home Offset Y:  72
+;     Home Offset Z:  0 
+;
+;   Simplify3D startup script
+;     G1 X move : 120
 ;
 ; Set all positioning to absolute
 G90  
