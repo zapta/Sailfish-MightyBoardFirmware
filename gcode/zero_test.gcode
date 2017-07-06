@@ -35,5 +35,5 @@ M135 T0 ; load right extruder offsets
 G1 X120 Y-70 Z30 F9000 ; move to wait position right hand side of the table
 ;----- move to 0,0 and wait
 G1 X0 Y0 Z10 F9000
-G4 P60000  ; wait 60 sec (does this work?)
+G4 P60000  ; wait 60 sec
 ;--

@@ -228,16 +228,20 @@ static void formatTime(char *buf, uint32_t val)
 				digit += bit;
 			}
 		}
-		if (hasdigit || digit != '0' || radidx >= houridx) {
+		if (hasdigit || digit != '0' || radidx >= minuteidx) {
 			buf[idx++] = digit;
 			hasdigit = true;
 		}
-		else
-			buf[idx++] = ' ';
-		if (radidx == houridx)
-			buf[idx++] = 'h';
-		else if (radidx == minuteidx)
+		// NOTE(zapta): changd to supress zero hours and leading minute zeros.
+		else {
+	  	  buf[idx++] = ' ';
+                }
+		if (radidx == houridx) {
+		  buf[idx++] = hasdigit ? 'h' : ' ';
+                }
+		else if (radidx == minuteidx) {
 			buf[idx++] = 'm';
+               }
 	}
 
 	buf[idx] = '\0';
@@ -1494,12 +1498,14 @@ void MonitorModeScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 		char buf[17];
 		uint32_t secs;
 
+	        bool isDone = command::getBuildPercentage() == 100 || host::isBuildComplete();
+
 		switch (buildTimePhase) {
 
 		case BUILD_TIME_PHASE_ELAPSED_TIME:
 			lcd.moveWriteFromPgmspace(0, 1, MON_ELAPSED_TIME_MSG);
 			lcd.setCursor(13, 1);
-			if ( host::isBuildComplete() )
+			if ( isDone )
 			     secs = lastElapsedSeconds; //We stop counting elapsed seconds when we are done
 			else {
 			     lastElapsedSeconds = host::getPrintSeconds();
@@ -1509,7 +1515,7 @@ void MonitorModeScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 			lcd.writeString(buf);
 			break;		
 		case BUILD_TIME_PHASE_TIME_LEFT:
-		        if (!host::isBuildComplete() && !heating && lastElapsedSeconds >= 5*60) {
+		        if (!isDone && !heating && lastElapsedSeconds >= 5*60) {
                           // NOTE(zapta) This may fail if no data. 
                           // Falling back to an empty display line.
 	  		  writeTimeLeft(lcd, 1);

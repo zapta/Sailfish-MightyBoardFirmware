@@ -292,12 +292,14 @@ const PROGMEM prog_uchar MAX_PROBE_HITS_MSG2[]      = "Use 0 for unlimited";
 #endif
 
 #if defined(ESTIMATE_TIME)
-const PROGMEM prog_uchar MON_TIME_LEFT_MSG[]      = "Time Left:   000h00m";
+//const PROGMEM prog_uchar MON_TIME_LEFT_MSG[]    = "Time Left:   000h00m";
+const PROGMEM prog_uchar MON_TIME_LEFT_MSG[]      = "To Go:            0m";
 const PROGMEM prog_uchar MON_TIME_LEFT_SECS_MSG[] = " secs";
 #endif
 
 #if defined(BUILD_STATS)
-const PROGMEM prog_uchar MON_ELAPSED_TIME_MSG[]   = "Elapsed:     000h00m";
+//const PROGMEM prog_uchar MON_ELAPSED_TIME_MSG[]   = "Elapsed:     000h00m";
+const PROGMEM prog_uchar MON_ELAPSED_TIME_MSG[]   = "Elapsed:          0m";
 #endif
 
 #if defined(MACHINE_ID_MENU)
