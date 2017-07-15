@@ -150,26 +150,32 @@ const static PROGMEM prog_uchar CLEAR_MSG[]     =  "                    ";
 
 #endif // ZYYX_3D_PRINTER
 
-#if !defined(PLATFORM_SPLASH1_MSG)
-#warning "Building with no PLATFORM_SPLASH1_MSG defined."
-const static PROGMEM prog_uchar SPLASH1_MSG[] = "      Sailfish      ";
-#else
-const static PROGMEM prog_uchar SPLASH1_MSG[] = PLATFORM_SPLASH1_MSG;
-#endif
+// NOTE(zapta): modified splash screen
+const static PROGMEM prog_uchar SPLASH1_MSG[] = "FF Creator Pro      ";
+const static PROGMEM prog_uchar SPLASH2_MSG[] = "                    ";
+const static PROGMEM prog_uchar SPLASH3_MSG[] = "Sailfish            ";
+const static PROGMEM prog_uchar SPLASH4_MSG[] = "Special Edition     ";
 
-#if !defined(HEATERS_ON_STEROIDS)
-const static PROGMEM prog_uchar SPLASH2_MSG[] = "--- Thing 32084 ----";
-#else
-const static PROGMEM prog_uchar SPLASH2_MSG[] = "-- Heater Special --";
-#endif
-
-#if defined(__AVR_ATmega2560__)
-const static PROGMEM prog_uchar SPLASH3_MSG[] = "ATmega 2560 " DATE_STR;
-#else
-const static PROGMEM prog_uchar SPLASH3_MSG[] = "ATmega 1280 " DATE_STR;
-#endif
-
-const static PROGMEM prog_uchar SPLASH4_MSG[] = "Sailfish v" VERSION_STR " r" VCS_VERSION_STR;
+//#if !defined(PLATFORM_SPLASH1_MSG)
+//#warning "Building with no PLATFORM_SPLASH1_MSG defined."
+//const static PROGMEM prog_uchar SPLASH1_MSG[] = "      Sailfish      ";
+//#else
+//const static PROGMEM prog_uchar SPLASH1_MSG[] = PLATFORM_SPLASH1_MSG;
+//#endif
+//
+//#if !defined(HEATERS_ON_STEROIDS)
+//const static PROGMEM prog_uchar SPLASH2_MSG[] = "--- Thing 32084 ----";
+//#else
+//const static PROGMEM prog_uchar SPLASH2_MSG[] = "-- Heater Special --";
+//#endif
+//
+//#if defined(__AVR_ATmega2560__)
+//const static PROGMEM prog_uchar SPLASH3_MSG[] = "ATmega 2560 " DATE_STR;
+//#else
+//const static PROGMEM prog_uchar SPLASH3_MSG[] = "ATmega 1280 " DATE_STR;
+//#endif
+//
+//const static PROGMEM prog_uchar SPLASH4_MSG[] = "Sailfish v" VERSION_STR " r" VCS_VERSION_STR;
 
 #include "locale.hh"
 

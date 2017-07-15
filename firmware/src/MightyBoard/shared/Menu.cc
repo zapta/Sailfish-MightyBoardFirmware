@@ -1464,7 +1464,12 @@ void MonitorModeScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 	// Build %
 	case 6:
 		state = host::getHostState();
-		if ( !heating && ((state == host::HOST_STATE_BUILDING) || (state == host::HOST_STATE_BUILDING_FROM_SD)) ) {
+                // NOTE(zapta): added READY to force displaying of DONE when 
+                // print is completed.
+		if ( !heating && (
+                       (state == host::HOST_STATE_BUILDING) || 
+                       (state == host::HOST_STATE_BUILDING_FROM_SD) ||
+                       (state == host::HOST_STATE_READY) )) {
 
 			uint8_t buildPercentage = command::getBuildPercentage();
 
@@ -1486,7 +1491,13 @@ void MonitorModeScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 		if (hasHBP && !singleTool)
 			break;
 		enum host::HostState hostState = host::getHostState();
-		if ( (hostState != host::HOST_STATE_BUILDING ) && ( hostState != host::HOST_STATE_BUILDING_FROM_SD ))
+
+                // NOTE(zapta): added READY to keep updating the display to 100% 
+                // after completion the print.
+ 
+		if ( ( hostState != host::HOST_STATE_BUILDING ) && 
+                     ( hostState != host::HOST_STATE_BUILDING_FROM_SD ) &&
+                     ( hostState != host::HOST_STATE_READY ))
 			break;
 
 		bool okButtonHeld = interface::isButtonPressed(ButtonArray::DOWN);
@@ -1560,6 +1571,12 @@ void MonitorModeScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 		break;
 #endif // BUILD_STATS
 	}
+
+//@@@@ temp
+//lcd.moveWriteInt(0, 0, updatePhase, 2);
+//lcd.writeInt(buildTimePhase, 2);
+//lcd.writeInt((int)host::getHostState(), 2);
+
 
 #ifdef BUILD_STATS
 	if (++updatePhase > 7)
