@@ -12,4 +12,7 @@ documentation
 firmware/build.sh
 firmware/checksize.sh
 firmware/svnversion.awk
+firmware/src/platforms.pyc
+firmware/src/__init__.pyc
+firmware/.sconsign.dblite
 NOTES.TXT
