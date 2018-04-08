@@ -29,7 +29,14 @@
 #define MAX_HBP_TEMP   130
 
 #define DEFAULT_P 7.0
-#define DEFAULT_I 0.325
+
+// NOTE(zapta): changed the default PID I gain from 0.325 to 0.45 per instructions here
+// https://groups.google.com/forum/#!topic/flashforge/I9lHQxRofEw
+// This was done in the EEPROM using ReplicatorG but changing the default here as well
+// in case of resetting the EEPROM parameters.
+// #define DEFAULT_I 0.325
+#define DEFAULT_I 0.45
+
 #define DEFAULT_D 36.0
 
 enum HeaterFailMode{
