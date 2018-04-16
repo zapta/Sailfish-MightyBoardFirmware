@@ -216,6 +216,9 @@ void setCustomColor(uint8_t red, uint8_t green, uint8_t blue) {
 // wiggly: set a three value color using a 2 value driver (+ ON/OFF channel)
 void setColor(uint8_t red, uint8_t green, uint8_t blue, bool clearOld) {
 
+     // NOTE(zapta): forcing white only color.
+     red = green = blue = 255;
+
      if ( !LEDEnabled )
 	  return;
 

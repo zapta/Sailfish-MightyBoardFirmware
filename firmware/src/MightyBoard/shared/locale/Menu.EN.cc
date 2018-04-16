@@ -196,7 +196,9 @@ const PROGMEM prog_uchar HEATER_FAIL_READ_MSG[]            = "Temperature reads 
 const PROGMEM prog_uchar BUILD_TIME_MSG[]	= "Print Time:     h  m";
 
 // Spaces needed at end to deal with alternation with auto-level status
-const PROGMEM prog_uchar Z_POSITION_MSG[]	= "ZPosition:   ";
+// NOTE(zapta): changed to Height
+//const PROGMEM prog_uchar Z_POSITION_MSG[]	= "ZPosition:   ";
+const PROGMEM prog_uchar Z_POSITION_MSG[]	= "Height:      ";
 
 const PROGMEM prog_uchar FILAMENT_MSG[]         = "Filament:";
 const PROGMEM prog_uchar MON_FILAMENT_MSG[]     = "Filament:      0.0mm";
@@ -293,7 +295,8 @@ const PROGMEM prog_uchar MAX_PROBE_HITS_MSG2[]      = "Use 0 for unlimited";
 
 #if defined(ESTIMATE_TIME)
 //const PROGMEM prog_uchar MON_TIME_LEFT_MSG[]    = "Time Left:   000h00m";
-const PROGMEM prog_uchar MON_TIME_LEFT_MSG[]      = "To Go:            0m";
+//const PROGMEM prog_uchar MON_TIME_LEFT_MSG[]      = "To Go:            0m";
+const PROGMEM prog_uchar MON_TIME_LEFT_MSG[]      = "To Go:           ---";
 const PROGMEM prog_uchar MON_TIME_LEFT_SECS_MSG[] = " secs";
 #endif
 

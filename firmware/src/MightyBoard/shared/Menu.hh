@@ -774,7 +774,11 @@ private:
 		BUILD_TIME_PHASE_FIRST = 0,
 		BUILD_TIME_PHASE_ELAPSED_TIME = BUILD_TIME_PHASE_FIRST,
 		BUILD_TIME_PHASE_TIME_LEFT,
-		BUILD_TIME_PHASE_FILAMENT,
+                // NOTE(zapta): removed this entry
+		// BUILD_TIME_PHASE_FILAMENT,
+		//
+		// This one is just a marker. Not included in the display
+		// iteration.
 		BUILD_TIME_PHASE_ZPOS,
 #ifdef ACCEL_STATS
 		BUILD_TIME_PHASE_ACCEL_STATS,

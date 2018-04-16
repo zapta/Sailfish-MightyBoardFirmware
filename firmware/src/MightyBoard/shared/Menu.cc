@@ -275,11 +275,13 @@ static bool writeTimeLeft(LiquidCrystalSerial& lcd, uint8_t row) {
      lcd.moveWriteFromPgmspace(0, row, MON_TIME_LEFT_MSG);
      lcd.setCursor(13, row);
 
+     // Display using seconds format
      if ( tsecs < 60 ) {
 	  digits2(buf, (uint8_t)tsecs);
 	  lcd.writeString(buf);
 	  lcd.writeFromPgmspace(MON_TIME_LEFT_SECS_MSG);
      }
+     // Display using minutes format
      else {
 	  formatTime(buf, (uint32_t)tsecs);
 	  lcd.writeString(buf);
@@ -303,7 +305,9 @@ void writeZPos(LiquidCrystalSerial& lcd, uint8_t row) {
 
      lcd.moveWriteFromPgmspace(0, row, Z_POSITION_MSG);
      lcd.setCursor(6, row);
-     lcd.writeFloat(stepperAxisStepsToMM(position[Z_AXIS], Z_AXIS), 3,LCD_SCREEN_WIDTH - 2);
+     // NOTE(zapta): reduced display granularity from 0.001mm to 0.01mm
+     //lcd.writeFloat(stepperAxisStepsToMM(position[Z_AXIS], Z_AXIS), 3,LCD_SCREEN_WIDTH - 2);
+     lcd.writeFloat(stepperAxisStepsToMM(position[Z_AXIS], Z_AXIS), 2,LCD_SCREEN_WIDTH - 2);
      lcd.writeFromPgmspace(MILLIMETERS_MSG);
 }
 
@@ -1509,10 +1513,15 @@ void MonitorModeScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 		char buf[17];
 		uint32_t secs;
 
-	        bool isDone = command::getBuildPercentage() == 100 || host::isBuildComplete();
+                // True if we should show also display lines other than time
+                // elapsed. We show them only during printing.
+	        const bool isDone = command::getBuildPercentage() == 100 || host::isBuildComplete();
+
+                const bool enableSecondaryDisplays = !isDone && !heating && lastElapsedSeconds > 30;
 
 		switch (buildTimePhase) {
 
+                // Show printing time so far
 		case BUILD_TIME_PHASE_ELAPSED_TIME:
 			lcd.moveWriteFromPgmspace(0, 1, MON_ELAPSED_TIME_MSG);
 			lcd.setCursor(13, 1);
@@ -1525,23 +1534,31 @@ void MonitorModeScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 			formatTime(buf, secs);
 			lcd.writeString(buf);
 			break;		
+
+                // Show estimated time to completion
 		case BUILD_TIME_PHASE_TIME_LEFT:
-		        if (!isDone && !heating && lastElapsedSeconds >= 5*60) {
-                          // NOTE(zapta) This may fail if no data. 
-                          // Falling back to an empty display line.
-	  		  writeTimeLeft(lcd, 1);
-			}
-			// If time left is not available display z poz.
-		        //writeZPos(lcd, 1);
+		        if (enableSecondaryDisplays) {
+                          if (lastElapsedSeconds < 5 * 60) {
+                            // We don't have yet a good time estimation
+                            lcd.moveWriteFromPgmspace(0, 1, MON_TIME_LEFT_MSG);
+                          } else {
+                            // NOTE(zapta) This may fail if no data. 
+                            // Falling back to leaving existing time so far.
+	  		    writeTimeLeft(lcd, 1);
+                          }
+                        } else {
+                          // Do nothing, Leave the previous display.
+                        }
 			break;
 
-                // NOTE(zapta): empty these display slots. This will leave
-                // the previous slot displayed.
-		case BUILD_TIME_PHASE_FILAMENT:
+                // Show head Z position
 		case BUILD_TIME_PHASE_ZPOS:
-		
-		case BUILD_TIME_PHASE_LAST:
-			break;
+		       if (enableSecondaryDisplays) {
+                         writeZPos(lcd, 1);
+                       } else {
+                         // Do nothing, Leave the previous display.
+                       }
+                       break;
 
 #ifdef ACCEL_STATS
 		case BUILD_TIME_PHASE_ACCEL_STATS:
@@ -1558,6 +1575,11 @@ void MonitorModeScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 			lcd.write(' ');
 			break;
 #endif // ACCEL_STATS
+
+                // NOTE(zapta): this one is just a marker, doesn't really included
+                // in the iteration and thus non reachable.
+		case BUILD_TIME_PHASE_LAST:
+			break;
 		}
 
         	if ( ! okButtonHeld ) {
