@@ -204,6 +204,22 @@ static void sio_open(char *filename, speed_t baud_rate)
 
 int main(int argc, char * argv[])
 {
+    // Write args to a temp file. Used to monitor the flags passed by 
+    // Simplify3D.
+    {
+      FILE *f = fopen("/tmp/gpx_log.txt", "w");
+      if (f == NULL)
+      {
+        printf("Error opening /tmp/gpx_log.txt file!\n");
+        exit(1);
+      }
+      fprintf("gpx got %d args\n", argc);
+      for (int i = 0; i < argc; i++) {
+        fprintf(f, "Arg %d: [%s]\n", i, argv[i]);
+      }
+      fclose(f);
+    }
+
     int c, i, rval;
     int log_to_file = 0;
     int standard_io = 0;
