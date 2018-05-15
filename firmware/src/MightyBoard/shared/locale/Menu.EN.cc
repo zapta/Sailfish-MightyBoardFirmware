@@ -77,8 +77,10 @@ const PROGMEM prog_uchar RESET2_MSG[]           = "settings?";
 const PROGMEM prog_uchar CANCEL_MSG[] = "Cancel this print?";
 const PROGMEM prog_uchar CANCEL_FIL_MSG[] = "Cancel load/unload?";
 
+// NOTE(zapta): changed Unpause to Resume
 const PROGMEM prog_uchar PAUSE_MSG[]      = "Pause  "; // must be same length as the next msg
-const PROGMEM prog_uchar UNPAUSE_MSG[]    = "Unpause"; // must be same length as the prior msg
+//const PROGMEM prog_uchar UNPAUSE_MSG[]    = "Unpause"; // must be same length as the prior msg
+const PROGMEM prog_uchar UNPAUSE_MSG[]    = "Resume "; // must be same length as the prior msg
 const PROGMEM prog_uchar COLD_PAUSE_MSG[] = "Cold Pause";
 
 #if defined(DEBUG_SD)
