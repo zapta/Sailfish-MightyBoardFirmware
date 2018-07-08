@@ -305,9 +305,10 @@ void writeZPos(LiquidCrystalSerial& lcd, uint8_t row) {
 
      lcd.moveWriteFromPgmspace(0, row, Z_POSITION_MSG);
      lcd.setCursor(6, row);
-     // NOTE(zapta): reduced display granularity from 0.001mm to 0.01mm
-     //lcd.writeFloat(stepperAxisStepsToMM(position[Z_AXIS], Z_AXIS), 3,LCD_SCREEN_WIDTH - 2);
-     lcd.writeFloat(stepperAxisStepsToMM(position[Z_AXIS], Z_AXIS), 2,LCD_SCREEN_WIDTH - 2);
+     // NOTE(zapta): reduced display granularity from 0.001mm to 0.01mm. Also extended the text
+     // message by one char to compensate (in another file).
+     //lcd.writeFloat(stepperAxisStepsToMM(position[Z_AXIS], Z_AXIS), 3, LCD_SCREEN_WIDTH - 2);
+     lcd.writeFloat(stepperAxisStepsToMM(position[Z_AXIS], Z_AXIS), 2, LCD_SCREEN_WIDTH - 2);
      lcd.writeFromPgmspace(MILLIMETERS_MSG);
 }
 

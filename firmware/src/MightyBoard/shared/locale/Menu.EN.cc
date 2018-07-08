@@ -198,9 +198,11 @@ const PROGMEM prog_uchar HEATER_FAIL_READ_MSG[]            = "Temperature reads 
 const PROGMEM prog_uchar BUILD_TIME_MSG[]	= "Print Time:     h  m";
 
 // Spaces needed at end to deal with alternation with auto-level status
-// NOTE(zapta): changed to Height
+// NOTE(zapta): changed to 'Height'
+// NOTE(zapta): extending text message by 1 char to compensate for the reduction
+// of the numeric display from 3 to 2 positions after the decimal point.
 //const PROGMEM prog_uchar Z_POSITION_MSG[]	= "ZPosition:   ";
-const PROGMEM prog_uchar Z_POSITION_MSG[]	= "Height:      ";
+const PROGMEM prog_uchar Z_POSITION_MSG[]	= "Height:       ";
 
 const PROGMEM prog_uchar FILAMENT_MSG[]         = "Filament:";
 const PROGMEM prog_uchar MON_FILAMENT_MSG[]     = "Filament:      0.0mm";
