@@ -2620,7 +2620,9 @@ void ThermistorScreen::notifyButtonPressed(ButtonArray::ButtonName button) {
 
 void PauseAtZPosScreen::reset() {
 	int32_t currentPause = command::getPauseAtZPos();
-	multiplier = 1;
+	//multiplier = 2;
+        // Start with tens digit.
+	digit = 3;
 
 	if ( currentPause == 0 ) {
 		Point position = steppers::getPlannerPosition();
@@ -2647,42 +2649,74 @@ void PauseAtZPosScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 
 void PauseAtZPosScreen::notifyButtonPressed(ButtonArray::ButtonName button) {
 	switch (button) {
+        // Center is save current Z pos.
 	case ButtonArray::CENTER:
 		// Set the pause
 		command::pauseAtZPos(stepperAxisMMToSteps(pauseAtZPos, Z_AXIS));
 		// Fall through
+        // Left is CANCEL
 	case ButtonArray::LEFT:
 		interface::popScreen();
 		break;
+        // Right is move to next digit (cyclic)
 	case ButtonArray::RIGHT:
-	        multiplier *= 10;
-		if ( multiplier > 100 ) multiplier = 1;
+                if (--digit < 0) {
+                  digit = 3;
+                }
+	        //multiplier *= 10;
+		//if ( multiplier > 100 ) multiplier = 1;
 		break;
+        // Up/Down are increment/decrement
 	case ButtonArray::UP:
 	case ButtonArray::DOWN:
 	{
-	     float incr = 0.01;
-	     uint16_t repetitions = Motherboard::getBoard().getInterfaceBoard().getButtonRepetitions();
-	     if ( repetitions > 18 ) incr = 10.0;
-	     else if ( repetitions > 12 ) incr = 1.0;
-	     else if ( repetitions > 6 ) incr = 0.1;
-	     if ( button == ButtonArray::UP )
-		  pauseAtZPos += incr * multiplier;
-	     else
-		  pauseAtZPos -= incr * multiplier;
+            
+             // NOTE(zapt): disabled the auto acceleration which is confusing. Use instead the
+             // right arrow button to change order of increment.
+             //
+             // TODO(zapt): can we display a marker under the digit that represent the increment?
+             //
+	     //const float incr = 0.01;
+	     //uint16_t repetitions = Motherboard::getBoard().getInterfaceBoard().getButtonRepetitions();
+	     //if ( repetitions > 18 ) incr = 10.0;
+	     //else if ( repetitions > 12 ) incr = 1.0;
+	     //else if ( repetitions > 6 ) incr = 0.1;
+
+             const float incr = 
+                 (digit == 0) ? 0.01 
+                   : (digit == 1) ? 0.1 
+                     : (digit == 2) ? 1.0 
+                       : 10.0;
+
+             // NOTE(zapta): we clip the range later in this method, after existing the switch() statement.
+	     if ( button == ButtonArray::UP ) {
+               pauseAtZPos += incr;
+             } else {
+               pauseAtZPos -= incr;
+             }
 	     break;
+
+	     //if ( button == ButtonArray::UP )
+	     //	  pauseAtZPos += incr * multiplier;
+	     //else
+	     //	  pauseAtZPos -= incr * multiplier;
+	     //break;
 	}
 	default:
 		break;
 	}
 
 	//Range clamping
-	if ( pauseAtZPos < 0.0 )	pauseAtZPos = 0.0;
+	if ( pauseAtZPos < 0.0 ) {
+          pauseAtZPos = 0.0;
+        }
 
-	float maxMM = stepperAxisStepsToMM(stepperAxis[Z_AXIS].max_axis_steps_limit, Z_AXIS) + 1.0;	//+1.0 to allow for rounding as
+	const float maxMM = stepperAxisStepsToMM(stepperAxis[Z_AXIS].max_axis_steps_limit, Z_AXIS) + 1.0;	//+1.0 to allow for rounding as
 	//steps per mm stored in eeprom isn't as high
 	//resolution as the xml in RepG
-	if ( pauseAtZPos > maxMM)	pauseAtZPos = maxMM;
+	if ( pauseAtZPos > maxMM) {
+          pauseAtZPos = maxMM;
+        }
 }
 
 #if defined(AUTO_LEVEL)

@@ -267,8 +267,18 @@ protected:
 class PauseAtZPosScreen: public Screen {
 
 private:
+        // Pause height in mm while editing
 	float pauseAtZPos;
-	int multiplier;
+    
+        // NOTE(zapta): change the zpos setting logic
+        // 
+        // indicates the current increment. Valid range [0, 3] 
+        // 0 for  0.01
+        // 1 for  0.10
+        // 2 for  1.00
+        // 3 for 10.00
+        int digit; 
+	//int multiplier;
 
 public:
 	PauseAtZPosScreen() :
