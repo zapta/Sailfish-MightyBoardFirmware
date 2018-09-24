@@ -5,6 +5,13 @@
 
 input_path="$1"
 
+echo "input_path: [$input_path]"
+
+if [ "$input_path" == "" ]; then
+    input_path="load.gcode"
+    echo "No .gcode file specified, using $input_path"
+fi
+
 # Verify extension is .gcode
 if [[ ! $input_path =~ ^.*[^/]\.gcode$ ]] ; then 
   echo "Expecting a .gcode input file"
