@@ -31,9 +31,10 @@ function check_last_cmd() {
 
 rm ${base_path}.x3g
 
+# NOTE(zapta). Setting verbose (-v flag) also displays on LCD an initial
+# messae with GPX version.
 
 ./gpx \
-  -v \
   -g \
   -p \
   -m r1d \

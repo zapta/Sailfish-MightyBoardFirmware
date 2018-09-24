@@ -13,16 +13,17 @@ M73 P0 ; Enable build prorgress indicator
 M73 P1 ; set progress to 1%
 
 ; Start heating right extruder to 220C.
-;M104 S220 T0
-M104 S40 T0 ; start heating extruder
+M104 S220 T0
+;M104 S40 T0 ; start heating extruder
 M133 T0  ; wait until extruder temprerature reached.
 
 ;G92 A0 B0 ; zero extruders (?)
 
-; --- Step1 - Initial load
+; --- Step1 - heat filament tip
 G4 P500 ; wait for completion
 M70 (Unloading...)
-G1 E10 F300 ; Push a small amount of fillament to free the extruder.
+; Push a small amount of fillament to free the extruder.
+G1 E20 F300 
 
 ; --- Step2 - Unload
 G4 P500
@@ -34,15 +35,16 @@ G1 E-50 F300  ; Pull fillament
 ; NOTE: M70 delay P is in secs, not millis.
 M71 P300 (Press OK to start)
 
-
 ; --- Step3 - Wait for loading
 G4 P100
 M73 P99 ; Set progress to 99%
 ; TODO(zapta): remove the delay here and made the message screen existing when printing done.
 ; NOTE: M70 delay P is in secs, not millis.
-M70 P36 (Loading...)
+M70 P18 (Loading...)
+; This does the actual loading. The E value should be proportional
+; to the P value of the M70 above.
+G1 E100  F300  
 
-G1 E200  F300  
 G4 P500 
 
 M140 S0 T0 ; cool down HBP
@@ -52,6 +54,6 @@ M104 S0 T1 ; cool down left extruder
 M18 ; disable all steppers
 M72 P1 ; play Ta-Da song
 M73 P100  ; progress 100%.
+; Wait for completion
 G4 P100 
 
-;M18 ; disable stepper
