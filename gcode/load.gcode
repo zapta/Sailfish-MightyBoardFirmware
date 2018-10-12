@@ -19,7 +19,7 @@ M133 T0  ; wait until extruder temprerature reached.
 
 ;G92 A0 B0 ; zero extruders (?)
 
-; --- Step1 - heat filament tip
+; --- Step1 - push filament in to release it.
 G4 P500 ; wait for completion
 M70 (Unloading...)
 ; Push a small amount of fillament to free the extruder.
@@ -32,18 +32,18 @@ G1 E-50 F300  ; Pull fillament
 ; --- Step3 - Wait for loading
 ; Display message and wait for click
 ; Using timeout to make sure we don't hold the nozzle hot indefinitly.
-; NOTE: M70 delay P is in secs, not millis.
-M71 P300 (Press OK to start)
+; NOTE: M70 delay P is in 0.15 secs units (??), not millis.
+M71 P2000 (Press OK to start)
 
 ; --- Step3 - Wait for loading
 G4 P100
 M73 P99 ; Set progress to 99%
 ; TODO(zapta): remove the delay here and made the message screen existing when printing done.
 ; NOTE: M70 delay P is in secs, not millis.
-M70 P18 (Loading...)
+M70 P36 (Loading...)
 ; This does the actual loading. The E value should be proportional
 ; to the P value of the M70 above.
-G1 E100  F300  
+G1 E200  F300  
 
 G4 P500 
 
