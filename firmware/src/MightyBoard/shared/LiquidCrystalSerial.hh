@@ -80,7 +80,14 @@
 // LCD display module only provides 8 custom characters and
 // n % 8 == n
 
-#define LCD_CUSTOM_CHAR_DOWN 0
+// Up to eight custom chars are programed in LiquidCrystalSerial.cc
+//
+// NOTE(zapta): change top of menu cursor
+// See this for codes https://cdn-shop.adafruit.com/datasheets/HD44780.pdf
+//#define LCD_CUSTOM_CHAR_DOWN 0
+//#define LCD_CUSTOM_CHAR_DOWN 0x1d     // > with underline 
+#define LCD_CUSTOM_CHAR_DOWN 0x7e     // right arrow
+
 #define LCD_CUSTOM_CHAR_EXTRUDER_NORMAL 2
 #define LCD_CUSTOM_CHAR_EXTRUDER_HEATING 3
 #define LCD_CUSTOM_CHAR_PLATFORM_NORMAL 4
@@ -89,7 +96,12 @@
 #define LCD_CUSTOM_CHAR_RETURN 7 // Must not be 0
 
 #define LCD_CUSTOM_CHAR_DEGREE 0xdf // MAY ALSO BE 0xdf
-#define LCD_CUSTOM_CHAR_UP 0x5e     // ^
+
+// NOTE(zapta): change top of menu cursor
+//#define LCD_CUSTOM_CHAR_UP 0x5e     // ^
+//#define LCD_CUSTOM_CHAR_UP 0x1d     // > with underline 
+#define LCD_CUSTOM_CHAR_UP 0x7e     // right arrow
+
 #define LCD_CUSTOM_CHAR_RIGHT 0x7e // right pointing arrow (0x7f is left pointing)
 
 // TODO:  make variable names for rs, rw, e places in the output vector
