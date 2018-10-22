@@ -50,6 +50,15 @@
 
 #define SD_MAXFILELENGTH 64
 
+// Zapta: For debugging.
+//static int debugRunningDigit() {
+//   static int iii = 0;
+//   if (++iii > 9) {
+//     iii = 0;
+//   }
+//   return iii;
+//}
+
 uint8_t lastFileIndex = 255;
 bool ready_fail = false;
 static bool singleTool = false;
@@ -79,6 +88,7 @@ ChangePlatformTempScreen      changePlatformTempScreen;
 FilamentMenu                  filamentMenu;
 FilamentOdometerScreen        filamentOdometerScreen;
 FilamentScreen                filamentScreen;
+ReloadingScreen               reloadingScreen;
 HeaterPreheatMenu             heaterPreheatMenu;
 HomeOffsetsModeScreen         homeOffsetsModeScreen;
 JogModeScreen                 jogModeScreen;
@@ -133,7 +143,9 @@ static void MenuBadness(const prog_uchar *msg)
 	Motherboard::getBoard().errorResponse(msg);
 }
 
+// Last screen index of heating progress bar.
 static uint8_t lastHeatIndex;
+
 static bool toggleBlink;
 
 //Renamed to zabs because of conflict with stdlib.h abs
@@ -860,6 +872,232 @@ void FilamentScreen::reset() {
 	for (uint8_t i = 0; i < EXTRUDERS; i++)
 		filamentTemp[i] = DEFAULT_PREHEAT_TEMP;
 }
+
+// ----------- End Reloading screen
+
+// Zapta: a new screen for easy reloading. It unload the old filament and loads
+// the new one in a single operation. Very useful for extruder like Flexion which 
+// have no release leverl.
+void ReloadingScreen::scheduleExtrusion(int32_t steps, int32_t us_per_step){
+        uint32_t us = abs(steps) * us_per_step;
+	Point targetPoint = Point(0,0,0);
+	targetPoint[A_AXIS] += steps;
+
+        // TODO(zapta): do we need these two?
+	steppers::resetAxisPot(AXIS_ID);
+	steppers::deprimeEnable(false);
+
+	// All axis are relative (0x1f is a bit mask of 5 1's, one for each axis).
+	steppers::setTargetNew(targetPoint, 0, us, 0x1f);
+}
+
+void ReloadingScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
+  // Debug
+  // lcd.moveWriteInt(0, 2, reloadingState, 2);
+  // lcd.writeInt(steppers::pendingMoves(), 2);
+  // lcd.writeInt(debugRunningDigit(), 2);
+
+  // We pass forceRedraw to the state handlers via the needsRedraw.
+  if (forceRedraw) {
+    needsRedraw = true;
+    toggle = false;
+  }
+
+  // Handle timeout. We time the entire reloading operation to make 
+  // sure the extruder is not left hot unintended.
+  if (reloadingState != RELOADING_DONE && reloadingTimer.hasElapsed() ) {
+    reloadingTimer = Timeout();
+    lcd.writeFromPgmspace(TIMEOUT_MSG);
+    Motherboard::interfaceBlinkOn();
+    reloadingState = RELOADING_DONE;
+    return;
+  }
+
+  // Dispatch the state handlers.
+  switch (reloadingState) {
+    case RELOADING_START_HEATING:
+      updateStartHeatingState(lcd);
+      break;
+
+    case RELOADING_WAIT_HEATING:
+      updateWaitHeatingState(lcd);
+      break;
+
+    case RELOADING_UNLOADING:
+      updateUnloadingState();
+      break;
+
+    case RELOADING_USER_ACK:
+      updateUserAckState(lcd);
+      break;
+
+    case RELOADING_LOADING:
+      updateLoadingState(lcd);
+      break;
+
+    default:
+    case RELOADING_DONE:
+      updateDoneState();
+      break;
+  }
+}
+
+
+// Update in START_HEATING state.
+void ReloadingScreen::updateStartHeatingState(LiquidCrystalSerial& lcd) {
+
+  // Determine target temperature.
+  const uint16_t offset = (toolID == 0) ?
+      preheat_eeprom_offsets::PREHEAT_RIGHT_TEMP : preheat_eeprom_offsets::PREHEAT_LEFT_TEMP;
+
+  const int16_t preheatTemp = eeprom::getEeprom16(eeprom_offsets::PREHEAT_SETTINGS + offset, DEFAULT_PREHEAT_TEMP);
+  const int16_t setTemp = (int16_t)(Motherboard::getBoard().getExtruderBoard(toolID).getExtruderHeater().get_set_temperature());
+
+  // If the tool is already set to a temp > preheat temp, then use it
+  reloadingTemp = ( preheatTemp >= setTemp ) ? preheatTemp : setTemp;
+  //reloadingTemp = 60;  // enable for quick for debugging
+
+  // Start the timer.
+  reloadingTimer.clear();
+  reloadingTimer.start(600000000); //10 minutes
+
+  // Start heating
+  Motherboard::getBoard().getExtruderBoard(toolID).getExtruderHeater().Pause(false);
+  Motherboard::getBoard().getExtruderBoard(toolID).getExtruderHeater().set_target_temperature(reloadingTemp);
+
+  // Advance state and display imedialty without waiting for next update cycle.
+  reloadingState = RELOADING_WAIT_HEATING;
+  updateWaitHeatingState(lcd);
+}
+
+// Update in WAIT_HEATING state.
+void ReloadingScreen::updateWaitHeatingState(LiquidCrystalSerial& lcd) {
+  // if extruder has reached hot temperature, start extruding
+  if (Motherboard::getBoard().getExtruderBoard(toolID).getExtruderHeater().has_reached_target_temperature() ) {
+    // We push two moves, first to push slightly in to release the filament
+    // and then to pull out.
+    lcd.clearHomeCursor();
+    lcd.writeFromPgmspace(UNLOADING_MSG);
+    scheduleExtrusion(-850, 5000); 
+    scheduleExtrusion(5000, 2500); 
+    reloadingState = RELOADING_UNLOADING;
+    needsRedraw= true;
+    return;
+  }
+
+  if (needsRedraw) {
+    lastHeatIndex = 0;
+    lcd.clearHomeCursor();
+    lcd.writeFromPgmspace(HEATING_MSG);
+    lcd.moveWriteFromPgmspace(0, 1, EXTRUDER_TEMP_MSG);
+    lcd.moveWriteFromPgmspace(0, 3, FILAMENT_CANCEL_MSG);
+    needsRedraw = false;
+  }
+
+  // extruder is still heating, update heating bar status
+  Heater &heater = Motherboard::getBoard().getExtruderBoard(toolID).getExtruderHeater();
+  int16_t currentDelta = heater.getDelta();
+  const int16_t setTemp = (int16_t)(heater.get_set_temperature());
+  progressBar(lcd, currentDelta, setTemp);
+
+  // Update every other pass to avoid flicket.
+  toggle = !toggle;
+  if (toggle) {
+    currentDelta = (int16_t)(heater.get_current_temperature());
+    lcd.moveWriteInt(12, 1, currentDelta, 3);
+    lcd.moveWriteInt(16, 1, reloadingTemp, 3);
+  }
+}
+
+// Update in UNLOADING state.
+void ReloadingScreen::updateUnloadingState() {
+  if (!steppers::pendingMoves()) {
+    reloadingState = RELOADING_USER_ACK;
+    needsRedraw= true;
+    return;
+  }
+
+  if (needsRedraw) {
+    needsRedraw = false;
+  }
+}
+
+// Update in USER_ACK state.
+void ReloadingScreen::updateUserAckState(LiquidCrystalSerial& lcd) {
+  if (needsRedraw) {
+    lcd.clearHomeCursor();
+    lcd.writeFromPgmspace(RELOADING_WAIT_MSG);
+    needsRedraw = false;
+  }
+  // We exist this step via the button handler below.
+}
+
+// Update in LOADING state.
+void ReloadingScreen::updateLoadingState(LiquidCrystalSerial& lcd) {
+  if (!steppers::pendingMoves()) {
+    reloadingState = RELOADING_DONE;
+    needsRedraw= true;
+    return;
+  }
+  if (needsRedraw) {
+    lcd.clearHomeCursor();
+    lcd.writeFromPgmspace(STOP_EXIT_MSG);
+    needsRedraw = false;
+  }
+}
+
+// Update in DONE state.
+void ReloadingScreen::updateDoneState() {
+  //stopMotor();
+  steppers::abort();
+  Motherboard::interfaceBlinkOff();
+
+  Heater& heater = Motherboard::getBoard().getExtruderBoard(toolID).getExtruderHeater();
+  heater.Pause(false);
+  heater.set_target_temperature(0);
+
+  _delay_us(1000000);
+  BOARD_STATUS_CLEAR(Motherboard::STATUS_ONBOARD_PROCESS);
+  interface::popScreen();
+}
+
+// Handle buttons
+void ReloadingScreen::notifyButtonPressed(ButtonArray::ButtonName button) {
+  // Handle center button
+  if (button == ButtonArray::CENTER) {
+    if (reloadingState == RELOADING_USER_ACK) {
+      scheduleExtrusion(-30000, 2500); 
+      reloadingState = RELOADING_LOADING;
+      needsRedraw = true;
+    }
+    else if (reloadingState == RELOADING_LOADING) {
+      reloadingState = RELOADING_DONE;
+      needsRedraw = true;
+    }
+    return;
+  }
+
+  // Handle left button
+  if (button == ButtonArray::LEFT) {
+    if (reloadingState != RELOADING_DONE) {
+      reloadingState = RELOADING_DONE;
+      needsRedraw = true;
+    }
+    return;
+  }
+}
+
+void ReloadingScreen::reset() {
+        //motorStarted = false;
+	needsRedraw = false;
+	toggleBlink = false;
+	lastHeatIndex = 0;
+	reloadingState = RELOADING_START_HEATING;
+	reloadingTimer = Timeout();
+	reloadingTemp = DEFAULT_PREHEAT_TEMP;
+}
+
+// ----------- End Reloading screen
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winline"
@@ -1595,7 +1833,7 @@ void MonitorModeScreen::update(LiquidCrystalSerial& lcd, bool forceRedraw) {
 #endif // BUILD_STATS
 	}
 
-//@@@@ temp
+//NOTE(zapta): temp, print debug info
 //lcd.moveWriteInt(0, 0, updatePhase, 2);
 //lcd.writeInt(buildTimePhase, 2);
 //lcd.writeInt((int)host::getHostState(), 2);
@@ -3581,8 +3819,9 @@ void MainMenu::handleSelect(uint8_t index) {
         // Load left extruder (wired as right0)
 	case 1:
 	        // Load right fillament.
-                filamentScreen.setScript(FILAMENT_RIGHT_FOR);
-                interface::pushScreen(&filamentScreen);
+                //filamentScreen.setScript(FILAMENT_RIGHT_FOR);
+                //interface::pushScreen(&filamentScreen);
+                interface::pushScreen(&reloadingScreen);
 		return;
         case 2:
 		// level_plate script

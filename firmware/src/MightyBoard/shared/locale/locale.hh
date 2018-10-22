@@ -43,6 +43,8 @@ extern const unsigned char YAXIS_MSG[];
 
 extern const unsigned char HEATER_ERROR_MSG[];
 
+extern const unsigned char UNLOADING_MSG[];
+extern const unsigned char RELOADING_WAIT_MSG[];
 extern const unsigned char STOP_EXIT_MSG[];
 extern const unsigned char TIMEOUT_MSG[];
 

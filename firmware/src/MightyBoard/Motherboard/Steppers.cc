@@ -127,9 +127,15 @@ uint8_t toolIndex = 0;
 uint16_t debugTimer = 0;
 #endif
 
-
+// NOTE(zapta): this doesn't do the expected thing. Sometimes returns zero when
+// the steppers are moving.
 bool isRunning() {
 	return is_running || is_homing;
+}
+
+// NOTE(zapta): added a more intuitive isRunning().
+int pendingMoves() {
+  return movesplanned();
 }
 
 

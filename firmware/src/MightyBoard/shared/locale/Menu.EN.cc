@@ -34,6 +34,8 @@ const PROGMEM prog_uchar YAXIS_MSG[] =      "Y Axis Line";
 
 const PROGMEM prog_uchar HEATER_ERROR_MSG[]=  "Extruders are not   " "heating.  Check the " "wiring.";
 
+const PROGMEM prog_uchar UNLOADING_MSG[] = "UNLOADING..." ;
+const PROGMEM prog_uchar RELOADING_WAIT_MSG[] = "LOADING...          " "                    " "                    " "Press OK to continue" ;
 const PROGMEM prog_uchar STOP_EXIT_MSG[] = "LOADING...          " "                    " "                    " "Press OK when done" ;
 const PROGMEM prog_uchar TIMEOUT_MSG[] = "5 minute timeout has" "elapsed.  Press the " "center button to    " "finish.";
 

@@ -54,6 +54,9 @@ namespace steppers {
     ///         otherwise.
     bool isRunning();
 
+    // This is a better isRunning().
+    int pendingMoves();
+
     /// re-initialize stepper pins - disable all axes
     void reset();
 

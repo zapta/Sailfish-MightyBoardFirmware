@@ -251,6 +251,46 @@ private:
 	void stopMotor();
 };
 
+class ReloadingScreen: public Screen {
+public:
+        enum RealodingState {
+           RELOADING_START_HEATING,
+           RELOADING_WAIT_HEATING,
+           RELOADING_UNLOADING,
+           RELOADING_USER_ACK,
+           RELOADING_LOADING,
+           RELOADING_DONE,
+        };
+
+	micros_t getUpdateRate() {
+          return 500L * 1000L;
+        }
+
+	void update(LiquidCrystalSerial& lcd, bool forceRedraw);
+	void reset();
+	void notifyButtonPressed(ButtonArray::ButtonName button);
+	uint8_t reloadingState;
+
+private:
+        static const uint8_t toolID = 0;
+        // TODO(zapta): include A_AXIS const properly
+        static const uint8_t AXIS_ID = 3;  // = A_AXIS;
+
+	Timeout reloadingTimer;
+	int16_t reloadingTemp;
+	bool toggle;
+	bool needsRedraw;
+        
+	void scheduleExtrusion(int32_t steps, int32_t us);
+
+	void updateStartHeatingState(LiquidCrystalSerial& lcd);
+	void updateWaitHeatingState(LiquidCrystalSerial& lcd);
+	void updateUnloadingState();
+	void updateUserAckState(LiquidCrystalSerial& lcd);
+	void updateLoadingState(LiquidCrystalSerial& lcd);
+	void updateDoneState();
+};
+
 class FilamentMenu: public Menu {
 
 public:
