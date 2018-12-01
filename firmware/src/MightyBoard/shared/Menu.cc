@@ -876,12 +876,15 @@ void FilamentScreen::reset() {
 // ----------- End Reloading screen
 
 // Zapta: a new screen for easy reloading. It unload the old filament and loads
-// the new one in a single operation. Very useful for extruder like Flexion which 
-// have no release leverl.
+// the new one in a single operation. Especially useful for extruder like Flexion
+//  which have no release lever.
+
+// Register a request to extrude. Positive steps for extrustion, negative for
+// retractio.
 void ReloadingScreen::scheduleExtrusion(int32_t steps, int32_t us_per_step){
         uint32_t us = abs(steps) * us_per_step;
 	Point targetPoint = Point(0,0,0);
-	targetPoint[A_AXIS] += steps;
+	targetPoint[A_AXIS] -= steps;
 
         // TODO(zapta): do we need these two?
 	steppers::resetAxisPot(AXIS_ID);
@@ -978,8 +981,8 @@ void ReloadingScreen::updateWaitHeatingState(LiquidCrystalSerial& lcd) {
     // and then to pull out.
     lcd.clearHomeCursor();
     lcd.writeFromPgmspace(UNLOADING_MSG);
-    scheduleExtrusion(-850, 5000); 
-    scheduleExtrusion(5000, 2500); 
+    scheduleExtrusion(850, 5000); 
+    scheduleExtrusion(-5000, 1500);   // speed was 2500
     reloadingState = RELOADING_UNLOADING;
     needsRedraw= true;
     return;
@@ -1066,7 +1069,7 @@ void ReloadingScreen::notifyButtonPressed(ButtonArray::ButtonName button) {
   // Handle center button
   if (button == ButtonArray::CENTER) {
     if (reloadingState == RELOADING_USER_ACK) {
-      scheduleExtrusion(-30000, 2500); 
+      scheduleExtrusion(10000, 2500); 
       reloadingState = RELOADING_LOADING;
       needsRedraw = true;
     }
