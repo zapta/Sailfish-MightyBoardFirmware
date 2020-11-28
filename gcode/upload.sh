@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash -x
 #
 # usage:   
 #  ./run.sh filename.gcode
@@ -13,13 +13,13 @@ if [ "$input_path" == "" ]; then
 fi
 
 # Verify extension is .gcode
-if [[ ! $input_path =~ ^.*[^/]\.gcode$ ]] ; then 
+if [[ ! "$input_path" =~ ^.*[^/]\.gcode$ ]] ; then 
   echo "Expecting a .gcode input file"
   exit 
 fi
 
 # Remove the .gcode extension
-base_path=${input_path%.*}
+base_path="${input_path%.*}"
 
 function check_last_cmd() {
   status="$?"
@@ -29,7 +29,7 @@ function check_last_cmd() {
   fi
 }
 
-rm ${base_path}.x3g
+rm "${base_path}.x3g"
 
 # NOTE(zapta). Setting verbose (-v flag) also displays on LCD an initial
 # messae with GPX version.
@@ -38,8 +38,8 @@ rm ${base_path}.x3g
   -g \
   -p \
   -m r1d \
-  ${base_path}.gcode \
-  ${base_path}.x3g
+  "${base_path}.gcode" \
+  "${base_path}.x3g"
 
 check_last_cmd "compiling gcode"
 
@@ -50,7 +50,7 @@ echo "Generated ${base_path}.x3g"
 # to upload the gpx file to the flashair SD card via wifi.
 #
 ../../../misc/repo/simplify3d/start_flashair_uploader.sh \
-  ./${base_path}.x3g
+  "${base_path}.x3g"
 
 
 

@@ -272,11 +272,13 @@ public:
 	uint8_t reloadingState;
 
 private:
+        // TODO(zapta): get rid of this const.
         static const uint8_t toolID = 0;
         // TODO(zapta): include A_AXIS const properly
-        static const uint8_t AXIS_ID = 3;  // = A_AXIS;
+        //static const uint8_t AXIS_ID = 3;  // = A_AXIS;
 
 	Timeout reloadingTimer;
+	Timeout beepTimer;
 	int16_t reloadingTemp;
 	bool toggle;
 	bool needsRedraw;

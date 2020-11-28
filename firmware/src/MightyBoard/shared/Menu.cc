@@ -873,7 +873,9 @@ void FilamentScreen::reset() {
 		filamentTemp[i] = DEFAULT_PREHEAT_TEMP;
 }
 
-// ----------- End Reloading screen
+// ----------- Start Reloading screen
+
+#define RELOADING_BEEP_INTERVAL_SECS 10
 
 // Zapta: a new screen for easy reloading. It unload the old filament and loads
 // the new one in a single operation. Especially useful for extruder like Flexion
@@ -887,7 +889,8 @@ void ReloadingScreen::scheduleExtrusion(int32_t steps, int32_t us_per_step){
 	targetPoint[A_AXIS] -= steps;
 
         // TODO(zapta): do we need these two?
-	steppers::resetAxisPot(AXIS_ID);
+	//steppers::resetAxisPot(AXIS_ID);
+	steppers::resetAxisPot(A_AXIS);
 	steppers::deprimeEnable(false);
 
 	// All axis are relative (0x1f is a bit mask of 5 1's, one for each axis).
@@ -980,9 +983,9 @@ void ReloadingScreen::updateWaitHeatingState(LiquidCrystalSerial& lcd) {
     // We push two moves, first to push slightly in to release the filament
     // and then to pull out.
     lcd.clearHomeCursor();
-    lcd.writeFromPgmspace(UNLOADING_MSG);
+    lcd.writeFromPgmspace(RELOADING_UNLOADING_MSG);
     scheduleExtrusion(850, 5000); 
-    scheduleExtrusion(-5000, 1500);   // speed was 2500
+    scheduleExtrusion(-5000, 1500);
     reloadingState = RELOADING_UNLOADING;
     needsRedraw= true;
     return;
@@ -1016,6 +1019,7 @@ void ReloadingScreen::updateWaitHeatingState(LiquidCrystalSerial& lcd) {
 void ReloadingScreen::updateUnloadingState() {
   if (!steppers::pendingMoves()) {
     reloadingState = RELOADING_USER_ACK;
+    beepTimer.start(RELOADING_BEEP_INTERVAL_SECS * 1000000);
     needsRedraw= true;
     return;
   }
@@ -1032,7 +1036,12 @@ void ReloadingScreen::updateUserAckState(LiquidCrystalSerial& lcd) {
     lcd.writeFromPgmspace(RELOADING_WAIT_MSG);
     needsRedraw = false;
   }
-  // We exist this step via the button handler below.
+  if (beepTimer.hasElapsed()) {
+    beepTimer.start(RELOADING_BEEP_INTERVAL_SECS * 1000000);
+    // 2KHZ, 500m.
+    Piezo::setTone(2000, 300);
+  }
+  // We exit this step via the button handler below.
 }
 
 // Update in LOADING state.
@@ -1044,7 +1053,7 @@ void ReloadingScreen::updateLoadingState(LiquidCrystalSerial& lcd) {
   }
   if (needsRedraw) {
     lcd.clearHomeCursor();
-    lcd.writeFromPgmspace(STOP_EXIT_MSG);
+    lcd.writeFromPgmspace(RELOADING_LOADING_MSG);
     needsRedraw = false;
   }
 }
@@ -1069,7 +1078,9 @@ void ReloadingScreen::notifyButtonPressed(ButtonArray::ButtonName button) {
   // Handle center button
   if (button == ButtonArray::CENTER) {
     if (reloadingState == RELOADING_USER_ACK) {
-      scheduleExtrusion(10000, 2500); 
+      // Make sure operation has sufficient timeout complete.
+      reloadingTimer.start(60000000); //60secs
+      scheduleExtrusion(7000, 2500);
       reloadingState = RELOADING_LOADING;
       needsRedraw = true;
     }
